@@ -2,7 +2,7 @@ require File.expand_path("lib/with_validations/version")
 
 Gem::Specification.new do |s|
   s.name        = "with_validations"
-  s.version     = With_Validations::VERSION
+  s.version     = WithValidations::VERSION
   s.authors     = ["Stefan Rohlfing"]
   s.date        = Time.now.strftime('%Y-%m-%d')
   s.description = <<-DESCRIPTION

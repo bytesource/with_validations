@@ -156,14 +156,5 @@ describe WithValidations do
       specify {TestClass.is_boolean?(:true).should be_false }
     end
 
-    context :is_unicode? do
-
-      ascii   = ["hello, ....", "This is perfect!"]
-      chinese = ["U盘", "X光", "周易衡"]
-
-      specify { ascii.all? {|word| TestClass.is_unicode?(word) }.should be_false }
-      specify { chinese.all? {|word| TestClass.is_unicode?(word) }.should be_true }
-
-    end
   end
 end
