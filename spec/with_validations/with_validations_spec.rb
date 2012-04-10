@@ -21,6 +21,11 @@ describe WithValidations do
         @compress
       end
 
+      def calls_validate_with_strict(options={})
+        @compress = validate(true) { [:compact, :with_pinyin, :size] }
+        @compress
+      end
+
       def self.calls_validate(options={})
         # @compress, @with_pinyin, @size = validate { [:compact, :with_pinyin, :size] }
         @compress, @with_pinyin, @size = validate { [:compact, :with_pinyin, :size] }
@@ -57,7 +62,7 @@ describe WithValidations do
         # All options provided
         options_complete_no_defaults     = {compact: true, with_pinyin: false, size: :short}
         options_not_complete_no_defaults = {with_pinyin: false, size: :short}  # :compact not passed
-        options_includes_unsupported_key = {compact: true, with_pinyin: false, size: :short, unsupported: ''}
+        options_includes_unsupported_key = {compact: true, with_pinyin: false, size: :short, unsupported: '', not_valid: ''}
         options_no_keys                  = {}
         options_with_invalid_value       = {compact: true, with_pinyin: false, size: 'invalid'}
 
@@ -76,6 +81,15 @@ describe WithValidations do
             TestClass.new.validate {    }
           end.should raise_exception(ArgumentError, /Block is empty/)
         end
+
+        it "should raise an exception if the optional parameter 'strict' is given the value 'true' as an argument
+        AND the options hash contains an unsupported key." do
+
+          lambda do
+            TestClass.new.calls_validate_with_strict(options_includes_unsupported_key)
+          end.should raise_exception(Exception, /unsupported, not_valid/)
+        end
+
 
         it "should raise an exception if a key is not found in OPTIONS" do
 

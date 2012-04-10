@@ -19,9 +19,13 @@ module WithValidations
   #  mandatory constant called `OPTIONS`. Keys from a methods `options` has that are not listed in `OPTIONS` are ignored.
   # @note A class that includes this module is required to:
   #
-  #  * have a constant named `OPTIONS` with a hash of the following type:
+  #  * provide a constant named `OPTIONS` with a hash of the following type:
   #   `{ option_key => [default_value, validation_proc], ...}`.
-  #  * to name the optional option hash of a method `options`.
+  #  * name the optional option hash of a method `options`.
+  # @overload validate(strict)
+  #  @param [Boolean] strict Whether or not raise an exception if the options has contains any unsupported keys.
+  #    Default: `false`
+  # @overload validate()
   # @example
   #   class TestClass
   #     include 'Options'
@@ -43,7 +47,7 @@ module WithValidations
   #
   #     #...
   #   end
-  def validate(&block)
+  def validate(strict = false, &block)
     raise ArgumentError, "No block given" unless block
 
     argument = block.call
@@ -54,6 +58,10 @@ module WithValidations
 
     constant = eval("OPTIONS", block.binding)
     options  = eval("options", block.binding) # Alternative: constant = block.binding.eval("OPTIONS")
+
+    ops = options.dup
+    ops.delete_keys!(*keys)
+    raise Exception, "The following keys are not supported: #{ops.keys.join(', ')}"  if ops.size > 0 && strict
 
     values = keys.map do |key|
       # Raise exception if 'key' is NOT a key in the OPTIONS constant.

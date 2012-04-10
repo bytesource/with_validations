@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 Elegant validation of option keys and values. Installation and usage is very simple. You find all
 the information you need on the homepage listed below.
 DESCRIPTION
-  s.summary               = 'WithValidation - Easy validation of option keys and value.'
+  s.summary               = 'WithValidation - Easy validation of option keys and values.'
   s.email                 = 'stefan.rohlfing@gmail.com'
   s.homepage              = 'http://github.com/bytesource/with_validations'
   s.has_rdoc              = 'yard'
