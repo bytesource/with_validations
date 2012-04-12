@@ -26,23 +26,34 @@ module WithValidations
   #  @param [Boolean] strict Whether or not raise an exception if the options has contains any unsupported keys.
   #    Default: `false`
   # @overload validate()
+  # @return [Array, Object] If more than one keys are evaluated, return an array of the key values, otherwise returns a single value.
   # @example
+  #  require 'with_validations'
+  #
   #   class TestClass
-  #     include 'Options'
+  #     include WithValidations
   #
   #     # option_key => [default_value, validation_proc]
   #     OPTIONS = {:compact      => [false, lambda {|value| is_boolean?(value) }],
   #                :with_pinyin  => [true,  lambda {|value| is_boolean?(value) }],
   #                :thread_count => [8,     lambda {|value| value.kind_of?(Integer) }]}
   #
+  #     # Instance method
   #     def test_method_1(options={})
   #       @thread_count = validate { :thread_count }
   #       # ...
   #     end
   #
+  #     # Singleton method
   #     def self.test_method_2(options={})
   #       @compact, @with_pinyin = validate { [:compact, :with_pinyin] }
   #       # ...
+  #     end
+  #
+  #     # Optional parameter set to true.
+  #     def self.test_method_3(options={})
+  #       @compact, @with_pinyin = validate(true) { [:compact, :with_pinyin] }
+  #       #...
   #     end
   #
   #     #...
@@ -59,13 +70,16 @@ module WithValidations
     constant = eval("OPTIONS", block.binding)
     options  = eval("options", block.binding) # Alternative: constant = block.binding.eval("OPTIONS")
 
+    # Handling optional argument 'strict'
     ops = options.dup
     ops.delete_keys!(*keys)
+    # If 'strict' is set to 'true', any key from the options key that is not part of the keys
+    # passed to the block will throw an exception.
     raise Exception, "The following keys are not supported: #{ops.keys.join(', ')}"  if ops.size > 0 && strict
 
     values = keys.map do |key|
-      # Raise exception if 'key' is NOT a key in the OPTIONS constant.
-      raise ArgumentError, "Key '#{key}' not found in OPTIONS" unless constant.keys.include?(key)
+      # Raise exception if 'key' from the block is NOT a key in the OPTIONS constant.
+      raise ArgumentError, "Key '#{key}' passed to the block not found in OPTIONS" unless constant.keys.include?(key)
 
       if options.has_key?(key) # Supported key in block found in options => extract its value from options.
         value = options[key]
@@ -85,11 +99,12 @@ module WithValidations
     values.size > 1 ? values : values [0]
   end
 
-  # Returns a new hash from `options` based on the keys provided
+  # Returns a new hash from `options` based on the keys in `*keys`.
   #  in `arr`. Keys in `arr` not found in `options` are ignored.
   #  *Use case*: When a method's options hash contains options for another method
   #  that throws an exeption if the options hash contains keys not handled internally (Example: CSV library)
   #  the options special to that method need to be extracted before passed as an argument.
+  # @return [Hash]
   # @example
   #   def sample_method(text, options={})
   #     @compact, @with_pinyin = validate { [:compact, :with_pinyin] }
@@ -108,7 +123,7 @@ module WithValidations
   # =============================
 
   # Helper method that can be used in a validation proc.
-  # @return [true, false] Returns `true` is the argument passed is either `true` or `false`.
+  # @return [true, false] Returns `true` if the argument passed is either `true` or `false`.
   #   Returns `false` on any other argument.
   def is_boolean?(value)
     # Only true for either 'false' or 'true'

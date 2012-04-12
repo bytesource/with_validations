@@ -1,6 +1,6 @@
 # WithValidations
 
-### Easy validation of one or more option keys and values using a single method.
+### Easy validation of option keys and their values.
 
 ## Features
 
@@ -18,66 +18,97 @@ $ gem install with_validations
 
 ## Usage
 
-__Note__: A class that includes this module is required to:
+__Note__: A class including this module also need to stick to the following conventions:
 
-* provide a constant named `OPTIONS` with a hash of the following type:
-`{ option_key => [default_value, validation_proc], ...}`.
-* name the optional option hash of a method `options`.
+* Provide a hash of the type `{ option_key => [default_value, validation_proc], ...}`
+  assigned to a constant named `OPTIONS`.
+* Name the option hash of a method `options`.
 
+### Sample Setup
 
 ````ruby
+require 'with_validations'
+
 class TestClass
-  include 'Options'
+  include WithValidations
 
   # option_key => [default_value, validation_proc]
   OPTIONS = {:compact      => [false, lambda {|value| is_boolean?(value) }],
              :with_pinyin  => [true,  lambda {|value| is_boolean?(value) }],
              :thread_count => [8,     lambda {|value| value.kind_of?(Integer) }]}
 
-  def test_method_1(options={})
+  # Instance method
+  def test_method_1(options={}) # options hash has to be named 'options'
     @thread_count = validate { :thread_count }
+
+    #...
+  end
+
+  # Singleton method
+  def self.test_method_2(options={})
+    @compact, @with_pinyin = validate { [:compact, :with_pinyin] }
+
     # ...
   end
 
-  def self.test_method_2(options={})
-     # Optional argument set to true: Throw exception if the options hash contains any
-     # unsupported keys.
+  # Optional parameter set to true.
+  def self.test_method_3(options={})
     @compact, @with_pinyin = validate(true) { [:compact, :with_pinyin] }
+
     # ...
   end
 
   #...
 end
+````
+
+#### Use Cases
+
+```` ruby
+obj = TestClass.new
+obj.test_method_1(:thread_count => 10)
+# @thread_count set to 10
+
+# No options hash passed, used default value
+my_class.test_method_1
+# @thread_count set to 8
+
+# Passing any invalid value
+my_class.test_method_1(:thread_count => 'invalid')
+# ArgumentError "Value 'invalid' is not a valid value for key 'thread_count'"
 
 
-my_class = TestClass.new
-my_class.test_method_1(:thread_count => 10)
-# @thread_count is set to 10
+TestClass.test_method_2(:compact => true, :with_pinyin => false)
+# @compact set to true, @with_pinyin set to false
 
-my_class.test_method_1(:thread_count => 10)
-# @thread_count is set to 10
+TestClass.test_method_2(:compact => true)
+# No options for key :with_pinyin provided: Use the default value
+# @compact is set to true, @with_pinyin is set to true
 
-my_class.test_method_1(:thread_count => 10)
-# @thread_count is set to 10
+# By default, any keys from the options hash that are not part of the block are ignored.
+TestClass.test_method_2(:compact => true,
+                        :with_pinyin => false,
+                        :thread_count => 10,           # Key in OPTIONS, but not part of the block.
+                        :not_listed => 'some value')   # Not part of the block
+# @compact set to true, @with_pinyin set to false
 
-TestClass.test_method2(:compact => true, :with_pinyin => false)
-# @compact is set to true, @with_pinyin is set to false
-
-TestClass.test_method2
-# No options provided: The default values from OPTIONS will be used
-# @compact is set to false, @with_pinyin is set to true
-
-TestClass.test_method2(:compact => true, :with_pinyin => false)
-# @compact is set to true, @with_pinyin is set to false
+# Optional argument set to true: Any key from the options hash that is not part of the keys
+     # passed to the block will throw an exception.
+TestClass.test_method_3(:compact => true,
+                        :with_pinyin => false,
+                        :thread_count => 10,           # Key in OPTIONS, but not part of the block.
+                        :not_listed => 'some value')   # Not part of the block
+# ArgumentError "The following keys are not supported: not_listed"
 ````
 
 ## Documentation
+
 ### Main method
 
-* [validate](http://rubydoc.info/github/bytesource/with_validations/WithValidations:validate)
+* [validate](http://rubydoc.info/github/bytesource/with_validations/master/WithValidations:validate)
 ### Optional methods
 
-* [extract_options](http://rubydoc.info/github/bytesource/with_validations/WithValidations:extract_options)
-* [is_boolean?](http://rubydoc.info/github/bytesource/with_validations/WithValidations:is_boolean?)
+* [extract_options](http://rubydoc.info/github/bytesource/with_validations/master/WithValidations:extract_options)
+* [is_boolean?](http://rubydoc.info/github/bytesource/with_validations/master/WithValidations:is_boolean%3F)
 
-_Note_: All methods are available as both instance and singleton methods.
+__Note__: All methods are available as both instance and singleton methods.

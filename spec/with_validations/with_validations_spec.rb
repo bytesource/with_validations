@@ -22,8 +22,8 @@ describe WithValidations do
       end
 
       def calls_validate_with_strict(options={})
-        @compress = validate(true) { [:compact, :with_pinyin, :size] }
-        @compress
+        @compress = validate(true) { [:compact, :with_pinyin] }
+        [@compress, @with_pinyin, @size]
       end
 
       def self.calls_validate(options={})
@@ -38,10 +38,6 @@ describe WithValidations do
         @compress
       end
 
-      # def calls_validate_wrong_type(options={})
-      #   @compress = validate { {:compact => true} }
-      #   @compress
-      # end
     end
   end
 
@@ -82,28 +78,22 @@ describe WithValidations do
           end.should raise_exception(ArgumentError, /Block is empty/)
         end
 
-        it "should raise an exception if the optional parameter 'strict' is given the value 'true' as an argument
-        AND the options hash contains an unsupported key." do
+        it "With the optional parameter 'strict' set to 'true', it should raise an exception if a key from the options hash
+         is not part of the keys given in the block" do
 
           lambda do
             TestClass.new.calls_validate_with_strict(options_includes_unsupported_key)
-          end.should raise_exception(Exception, /unsupported, not_valid/)
+          end.should raise_exception(Exception, /not supported: size, unsupported, not_valid/)
         end
 
 
-        it "should raise an exception if a key is not found in OPTIONS" do
+        it "should raise an exception if a key given in the block is not found in OPTIONS" do
 
           lambda do
             TestClass.new.calls_validate_key_not_found
-          end.should raise_exception(ArgumentError, /'a string' not found in OPTIONS/)
+          end.should raise_exception(ArgumentError, /'a string' passed to the block not found in OPTIONS/)
         end
 
-        # it "should raise an exception if the argument has the wrong type" do
-
-        #   lambda do
-        #     TestClass.new.calls_validate_wrong_type
-        #   end.should raise_exception(ArgumentError, /Invalid argument '{:compact=>true}'/)
-        # end
 
         it "should raise an exception if a key value is invalid" do
 

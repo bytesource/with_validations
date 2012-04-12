@@ -6,8 +6,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Stefan Rohlfing"]
   s.date        = Time.now.strftime('%Y-%m-%d')
   s.description = <<-DESCRIPTION
-Elegant validation of option keys and values. Installation and usage is very simple. You find all
-the information you need on the homepage listed below.
+Easy validation of option keys and their values. Installation and usage is very simple. You find all
+the information you need on my homepage listed below.
 DESCRIPTION
   s.summary               = 'WithValidation - Easy validation of option keys and values.'
   s.email                 = 'stefan.rohlfing@gmail.com'
@@ -18,5 +18,5 @@ DESCRIPTION
 
   s.add_development_dependency 'rspec'
 
-  s.files = Dir["{lib}/**/*.rb", "*.md", 'Rakefile', 'LICENSE']
+  s.files = Dir["{lib}/**/*.rb", "*.md", 'Rakefile', 'LICENSE', 'Gemfile']
 end
