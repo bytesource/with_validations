@@ -75,7 +75,7 @@ my_class.test_method_1
 
 # Passing any invalid value
 my_class.test_method_1(:thread_count => 'invalid')
-# ArgumentError "Value 'invalid' is not a valid value for key 'thread_count'"
+# ArgumentError: Value 'invalid' is not a valid value for key 'thread_count'
 
 
 TestClass.test_method_2(:compact => true, :with_pinyin => false)
@@ -98,7 +98,7 @@ TestClass.test_method_3(:compact => true,
                         :with_pinyin => false,
                         :thread_count => 10,           # Key in OPTIONS, but not part of the block.
                         :not_listed => 'some value')   # Not part of the block
-# ArgumentError "The following keys are not supported: not_listed"
+# Exception: The following keys are not supported: not_listed
 ````
 
 ## Documentation
